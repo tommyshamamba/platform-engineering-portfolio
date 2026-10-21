@@ -2,6 +2,7 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const { randomUUID } = require('node:crypto');
 const root = path.resolve(__dirname, '..', '.test-data');
 const folder = path.join(root, randomUUID());
@@ -53,6 +54,37 @@ test('provider validates output and sanitizes upstream failures without network 
   }
   const unavailable = createAI({ mode: 'anthropic', client: { messages: { create: async () => { throw new Error('private upstream details'); } } } });
   await assert.rejects(unavailable.callAI('prompt', 10, 'questions'), error => error.status === 503 && !error.message.includes('private'));
+});
+
+test('built frontend serves assets and client routes while preserving API responses', async (t) => {
+  const build = fs.mkdtempSync(path.join(os.tmpdir(), 'interview-frontend-'));
+  t.after(() => fs.rmSync(build, { recursive: true, force: true }));
+  const html = '<!doctype html><title>Interview test frontend</title>';
+  const script = 'window.frontendLoaded = true;';
+  fs.writeFileSync(path.join(build, 'index.html'), html);
+  fs.writeFileSync(path.join(build, 'app.js'), script);
+  const app = createApp({ build });
+  const frontend = await new Promise(resolve => { const s = app.listen(0, '127.0.0.1', () => resolve(s)); });
+  const url = `http://127.0.0.1:${frontend.address().port}`;
+  try {
+    for (const route of ['/', '/register', '/sessions/example/coaching']) {
+      const response = await fetch(url + route);
+      assert.equal(response.status, 200, route);
+      assert.match(response.headers.get('content-type'), /text\/html/);
+      assert.equal(await response.text(), html);
+    }
+    const asset = await fetch(url + '/app.js');
+    assert.equal(asset.status, 200);
+    assert.equal(await asset.text(), script);
+    const health = await fetch(url + '/api/status');
+    assert.equal(health.status, 200);
+    assert.equal((await health.json()).status, 'ok');
+    for (const [route, method] of [['/api/missing', 'GET'], ['/register', 'POST']]) {
+      const response = await fetch(url + route, { method });
+      assert.equal(response.status, 404);
+      assert.deepEqual(await response.json(), { error: 'Route not found.' });
+    }
+  } finally { await new Promise(resolve => frontend.close(resolve)); }
 });
 
 test('registration, login and expired tokens', async () => {

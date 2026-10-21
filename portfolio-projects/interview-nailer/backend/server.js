@@ -9,7 +9,7 @@ const store = require('./services/store');
 const defaultAI = require('./config/ai');
 const { object } = require('./services/validation');
 
-function createApp({ ai = defaultAI, limits = {} } = {}) {
+function createApp({ ai = defaultAI, limits = {}, build = path.join(__dirname, '..', 'frontend', 'build') } = {}) {
   const app = express();
   app.locals.ai = ai;
   app.disable('x-powered-by');
@@ -41,10 +41,9 @@ function createApp({ ai = defaultAI, limits = {} } = {}) {
   app.use('/api/sessions', aiLimiter, require('./routes/sessions'));
   app.get(['/health', '/api/status'], (req, res) => res.json({ status: 'ok', version: '1.0.0',
     service: 'Interview Nailer API', node_env: config.nodeEnv, storage_mode: config.storageMode, ai_mode: config.aiMode }));
-  const build = path.join(__dirname, '..', 'frontend', 'build');
   if (fs.existsSync(path.join(build, 'index.html'))) {
     app.use(express.static(build));
-    app.get('*', (req, res, next) => req.path.startsWith('/api/') ? next() : res.sendFile(path.join(build, 'index.html')));
+    app.get('/{*splat}', (req, res, next) => req.path.startsWith('/api/') ? next() : res.sendFile(path.join(build, 'index.html')));
   }
   app.use((req, res) => res.status(404).json({ error: 'Route not found.' }));
   app.use((error, req, res, next) => {
