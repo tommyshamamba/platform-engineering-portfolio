@@ -43,4 +43,4 @@ docker compose config -q                      # compose file validates (with and
 shellcheck scripts/*.sh                       # clean
 python -m unittest discover -s tests -v       # 3 tests: reconnect after drop, backoff while down, gap counting
 ```
-Not verified here: pulling the image and connecting to the live feed. The machine used for verification has no Docker daemon.
+Live check (27 October 2026): `docker compose up` pulled the image, the relay logged `Feed connected` to `wss://arb1-feed.arbitrum.io/feed`, `relay_watchdog.sh --once` exited 0, and the consumer received feed frames on `ws://127.0.0.1:9642` with no sequence gaps. It exited 1 again after `docker compose down`. The test machine only allowed outbound traffic from the host network, so that run used a local override with `network_mode: host`; the committed bridge-network file was not tested against the live feed.
