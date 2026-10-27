@@ -1,0 +1,17 @@
+{
+  "name": "flashloan-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Recovered Aave V3 flash-loan receiver contracts with Foundry unit tests against local mocks; no RPC, no keys",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test -vv"
+  },
+  "devDependencies": {
+    "@aave/core-v3": "1.19.3",
+    "@openzeppelin/contracts": "4.9.6",
+    "@uniswap/v3-core": "1.0.1",
+    "@uniswap/v3-periphery": "1.4.4",
+    "forge-std": "https://github.com/foundry-rs/forge-std/tarball/v1.9.6"
+  }
+}

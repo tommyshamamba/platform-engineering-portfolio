@@ -32,6 +32,9 @@ These are development projects with local demonstration workflows. The [verifica
 | [Kubernetes Demo](portfolio-projects/kubernetes-demo/) | Containerized application delivery | Frontend and backend, Docker Compose, Kubernetes manifests and Terraform configuration. |
 | [Terraform Modules](portfolio-projects/terraform-modules/) | Reusable infrastructure | VPC and application load-balancer modules with examples. |
 | [On-chain Execution Engine](onchain-execution-engine/) | Security and design case study (research prototype) | Flash-loan executor contract with one-time callback binding, a timelocked UUPS upgrade and a guardian pause. The Python engine is split into a package, with offline tests and an honest limitations list. |
+| [Flash-loan Contracts](flashloan-contracts/) | Smart-contract security exercise (research prototype) | Two earlier Aave V3 flash-loan receivers from the Ethereum phase, with 13 Foundry tests against local mocks. They pin down access-control, approval and slippage findings. Nothing deploys. |
+| [Solana Flash-loan Program](solana-flashloan-program/) | Anchor case study (research prototype) | An Anchor 0.30.1 program built for SBF, with 5 `solana-program-test` tests. They show it borrows and swaps nothing, records fixed-rate stub values, and lacks authority checks. |
+| [Arbitrum Relay Node](arbitrum-relay-node/) | Node operations | Docker Compose for the Nitro sequencer-feed relay, a shellcheck-clean watchdog and monitor, and a reconnecting feed consumer with offline tests. |
 | [Voice AI Missed-Call](portfolio-projects/voice-ai-missed-call/) | Event processing and automation | Local missed-call simulation, saved response drafts and duplicate-event handling, plus provider integration guides. |
 
 ## Run a project
@@ -69,12 +72,15 @@ platform-engineering-portfolio/
 ├── docs/                 # Catalog, demo guides and verification reports
 │   └── plans/            # Three proposed systems and delivery milestones
 ├── onchain-execution-engine/ # Case study: executor contract + engine package, offline tests
+├── flashloan-contracts/  # Earlier Aave V3 receivers + Foundry tests (no deployment)
+├── solana-flashloan-program/ # Anchor program case study + program-test suite
+├── arbitrum-relay-node/  # Nitro feed relay: compose, watchdog, consumer
 ├── scripts/              # Source checks and browser smoke checks
 ├── .github/workflows/    # Automated project checks
 └── CONTRIBUTING.md       # Development and contribution workflow
 ```
 
-`onchain-execution-engine/` is a research prototype. Its [regression suite](onchain-execution-engine/tests/README.md) uses mocked RPC behavior and an in-memory EVM. It sits outside the demo launcher, sends nothing unless explicitly enabled, and claims no live operation or results.
+`onchain-execution-engine/`, `flashloan-contracts/` and `solana-flashloan-program/` are research prototypes. None of them is wired to a deploy or broadcast path by default, and none claims trading results. The engine's [regression suite](onchain-execution-engine/tests/README.md) uses mocked RPC behavior and an in-memory EVM. It sits outside the demo launcher, sends nothing unless explicitly enabled, and claims no live operation or results.
 
 ## Engineering notes
 

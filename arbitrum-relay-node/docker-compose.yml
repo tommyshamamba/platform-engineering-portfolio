@@ -1,0 +1,26 @@
+# Arbitrum One sequencer-feed relay (Offchain Labs Nitro `relay` entrypoint).
+# Based on the `docker run` command used in Nov-Dec 2025:
+#   docker run -p 9642:9642 --dns 1.1.1.1 --entrypoint relay offchainlabs/nitro-node:v3.9.2-52e8959 \
+#     --node.feed.output.addr=0.0.0.0 --node.feed.input.url=wss://arb1-feed.arbitrum.io/feed --chain.id=42161
+# The relay only rebroadcasts the public feed. It holds no keys and sends no transactions.
+name: arbitrum-relay
+services:
+  arbitrum-relay:
+    image: ${NITRO_IMAGE:-offchainlabs/nitro-node:v3.9.2-52e8959}
+    entrypoint: relay
+    command:
+      - "--node.feed.output.addr=0.0.0.0"
+      - "--node.feed.input.url=${FEED_INPUT_URL:-wss://arb1-feed.arbitrum.io/feed}"
+      - "--chain.id=${CHAIN_ID:-42161}"
+    ports:
+      # Bound to localhost: consumers on this machine only.
+      - "127.0.0.1:${RELAY_PORT:-9642}:9642"
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
